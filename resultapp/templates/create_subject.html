@@ -1,0 +1,37 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+    <h2 class="mb-4"><i class="fas fa-book"></i>Create Subject</h2>
+
+    {% if messages %}
+        {% for m in messages %}
+            <div class="alert alert-{% if m.tags == 'error'%}danger{% else %}{{m.tags}}{% endif %} alert-dismissible fade show" role="alert">
+                {{m}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="subjectName" class="form-label">Subject Name</label>
+            <input type="text" class="form-control" id="subjectName" name="subjectName" placeholder="e.g., python, java " required>
+            
+        </div>
+        <div class="mb-3">
+            <label for="subjectCode" class="form-label">Subject Code</label>
+            <input type="text" class="form-control" id="subjectCode" name="subjectCode" placeholder="e.g., SC08739" required>
+            
+        </div>
+        
+        <button type="submit" class="btn btn-success">
+            <i class="fas fa-check me-1"></i>Submit
+        </button>
+    </form>
+</div>
+
+
+{% endblock %}

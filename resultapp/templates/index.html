@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header class="py-5 bg-dark text-white">
+  <div class="container text-center">
+    <h1 class="display-3 fw-bold">Student Result Managment System</h1>
+    <p class="lead">manage and view result efficiently</p>
+  </div>
+</header>
+
+<section class="py-5">
+  <div class="container">
+    <h2 class="text-center mb-4"><i class="fas fa-bullhorn text-primary"></i>Notice Board</h2>
+    <div class="border p-3 rounded bg-light">
+      <marquee direction="up" scrollamount="3" onmouseover="this.stop()" onmouseout="this.start()">
+        <ul class="list-unstyled">
+          <li class="mb-2"><a href="notice1.html" target="_blank"><i class="fas fa-angle-right text-primary"></i>Notice1</a></li>
+          <li class="mb-4"><a href="notice2.html" target="_blank"><i class="fas fa-angle-right text-primary"></i>Notice2</a></li>
+        </ul>
+      </marquee>
+    </div>
+  </div>
+</section>
+{% endblock  %}
+

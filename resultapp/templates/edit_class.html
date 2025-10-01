@@ -1,0 +1,42 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+    <h2 class="mb-4"><i class="fas fa-edit"></i>Edit Student Class</h2>
+
+     {% if messages %}
+        {% for m in messages %}
+            <div class="alert alert-{{ m.tags }} alert-dismissible fade show" role="alert">
+                {{m}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="streamName" class="form-label">Stream</label>
+            <input type="text" class="form-control" id="streamName" name="streamName" placeholder="Enter Stream here " required value="{{ class_to_delete.streamName }}">
+            <small class="text-muted">e.g., CS, IT, etc..</small>
+        </div>
+        <div class="mb-3">
+            <label for="yearStreamr" class="form-label">Year of stream</label>
+            <input type="text" class="form-control" id="yearStream" name="yearStream" placeholder="Enter Year" required value="{{ class_to_delete.yearStream }}">
+            <small class="text-muted">e.g., First Year, Second Year, Third Year</small>
+        </div>
+        <div class="mb-3">
+            <label for="section" class="form-label">Section</label>
+            <input type="text" class="form-control" id="section" name="section" placeholder="Enter your section" required value="{{ class_to_delete.section }}">
+            <small class="text-muted">e.g., A, B, C </small>
+        </div>
+        <button type="submit" class="btn btn-success">
+            <i class="fas fa-check me-1"></i>Submit
+        </button>
+    </form>
+</div>
+
+
+{% endblock %}
