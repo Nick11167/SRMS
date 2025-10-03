@@ -1,0 +1,49 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+    <h2 class="mb-4"><i class="fas fa-plus"></i>Declare Result</h2>
+
+    {% if messages %}
+        {% for m in messages %}
+            <div class="alert alert-{% if m.tags == 'error'%}danger{% else %}{{m.tags}}{% endif %} alert-dismissible fade show" role="alert">
+                {{m}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+     
+            
+        <div class="mb-3">
+            <label for="student_id" class="form-label">Select Class</label>
+            <select class="form-select" id="student_id" name="studentid" required>
+                <option value="">--Select Student--</option>
+            </select>
+        </div>
+
+        <div id="subject_fields">
+
+        </div>
+        
+        <button type="submit" class="btn btn-success">
+            <i class="fas fa-check me-1"></i>Submit
+        </button>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js">{
+    document.getElementById('class_id').addEventListener('Change', function(){
+        const classId = this.value;
+
+
+        if(!classId) return;
+
+        fetch(`/get_students_subjects/?class_id=${classId}/`)
+    })
+</script>
+
+{% endblock %}
