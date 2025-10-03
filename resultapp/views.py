@@ -135,22 +135,33 @@ def edit_subject(request,subject_id):
 def add_subject_combination(request):
     classes = Studentclass.objects.all()
     subjects = Subject.objects.all()   
+
     if request.method == 'POST':
         try:
             class_id = request.POST.get('class')
             subject_id = request.POST.get('subject')
+
             selected_class = Studentclass.objects.get(id=class_id)
             selected_subject = Subject.objects.get(id=subject_id)
-            SubjectCombination.objects.create(
-                student_class=selected_class,
-                subject=selected_subject,
-                status=1
-            )
-            messages.success(request, "Subject combination added successfully!")
+
+            # ✅ Check if combination already exists
+            if SubjectCombination.objects.filter(student_class=selected_class, subject=selected_subject).exists():
+                messages.warning(request, "This subject combination already exists!")
+            else:
+                SubjectCombination.objects.create(
+                    student_class=selected_class,
+                    subject=selected_subject,
+                    status=1
+                )
+                messages.success(request, "Subject combination added successfully!")
+
         except Exception as e:
             messages.error(request, f'Something went wrong: {str(e)}')
+
         return redirect('add_subject_combination')
+
     return render(request, 'add_subject_combination.html', locals())
+
 
 def manage_subject_combination(request):
     combinations = SubjectCombination.objects.all()
