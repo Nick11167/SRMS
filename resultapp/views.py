@@ -6,7 +6,14 @@ from django.contrib.auth.decorators import login_required
 
 
 def index(request):
-    return render(request, 'index.html')
+    notices = Notice.objects.all().order_by('-id')
+    return render(request, 'index.html', locals())
+
+def notice_detail(request, notice_id):
+    notices = Notice.objects.get(id=notice_id)
+    return render(request, 'notice_detail.html', locals())
+
+# @login_required
 def admin_login(request):
     if request.user.is_authenticated:
         return redirect('admin_dashboard')
@@ -23,11 +30,17 @@ def admin_login(request):
             error = "Invalid credentials or not authorized."
     return render(request, 'admin_login.html',locals())
 
+@login_required
 def admin_dashboard(request):
-     if not request.user.is_authenticated:
+    if not request.user.is_authenticated:
         return redirect('admin_login')
-     return render(request,'admin_dashboard.html')
+    total_students = Student.objects.count()
+    total_subjects = Subject.objects.count()
+    total_classes = Studentclass.objects.count()
+    total_results = Result.objects.values('student').distinct().count()
+    return render(request,'admin_dashboard.html', locals())
 
+# @login_required
 def admin_logout(request):
     logout(request)
     return redirect('admin_login')
@@ -88,6 +101,7 @@ def edit_class(request,class_id):
     
     return render(request, 'edit_class.html', {'class_to_delete': class_to_delete})
 
+@login_required
 def create_subject(request):
     if request.method == 'POST':
         try:
@@ -103,6 +117,7 @@ def create_subject(request):
         return redirect('create_subject') 
     return render(request, 'create_subject.html')
 
+@login_required
 def manage_subject(request):
     subjects = Subject.objects.all()
     if request.GET.get('delete'):
@@ -116,6 +131,7 @@ def manage_subject(request):
         return redirect('manage_subject')
     return render(request,'manage_subject.html', locals())
 
+@login_required
 def edit_subject(request,subject_id):
     subject_to_delete = Subject.objects.get(id=subject_id)
     if request.method == 'POST':
@@ -132,6 +148,7 @@ def edit_subject(request,subject_id):
     
     return render(request, 'edit_subject.html',locals())
 
+@login_required
 def add_subject_combination(request):
     classes = Studentclass.objects.all()
     subjects = Subject.objects.all()   
@@ -162,7 +179,7 @@ def add_subject_combination(request):
 
     return render(request, 'add_subject_combination.html', locals())
 
-
+@login_required
 def manage_subject_combination(request):
     combinations = SubjectCombination.objects.all()
     aid = request.GET.get('aid')
@@ -183,6 +200,7 @@ def manage_subject_combination(request):
         return redirect('manage_subject_combination')
     return render(request,'manage_subject_combination.html', locals())
 
+@login_required
 def add_student(request):
     classes = Studentclass.objects.all() 
     if request.method == 'POST':
@@ -208,11 +226,13 @@ def add_student(request):
         return redirect('add_student')
     return render(request, 'add_student.html', locals())
 
+@login_required
 def manage_students(request):
     students = Student.objects.all()
     
     return render(request,'manage_students.html', locals())
 
+@login_required
 def edit_student(request,student_id):
     student_to_delete = Student.objects.get(id=student_id)
     if request.method == 'POST':
@@ -231,6 +251,7 @@ def edit_student(request,student_id):
     
     return render(request, 'edit_student.html',locals())
 
+@login_required
 def add_notice(request):
     if request.method == 'POST':
         try:
@@ -246,6 +267,7 @@ def add_notice(request):
         return redirect('add_notice')
     return render(request, 'add_notice.html', locals())
 
+@login_required
 def manage_notice(request):
     notices = Notice.objects.all()
     if request.GET.get('delete'):
@@ -259,32 +281,136 @@ def manage_notice(request):
         return redirect('manage_notice')
     return render(request,'manage_notice.html', locals())
 
+@login_required
 def add_result(request):
     classes = Studentclass.objects.all() 
     if request.method == 'POST':
         try:
-            name = request.POST.get('fullname')
-            roll_no = request.POST.get('rollno')
-            email_id = request.POST.get('emailid')
-            gender = request.POST.get('gender')
-            class_id = request.POST.get('class')
-            dob = request.POST.get('dob')
-            student_class = Studentclass.objects.get(id=class_id)
-            Student.objects.create(
-                name=name,
-                roll_number=roll_no,
-                email=email_id,
-                gender=gender,
-                date_of_birth=dob,
-                student_class=student_class
-            )
-            messages.success(request, "Subject info added successfully!")
+            class_id = request.POST.get('classid')
+            student_id = request.POST.get('studentid')
+            marks_data = {key.split('_')[1]:value for key, value in request.POST.items() if key.startswith('marks_')}
+            for subject_id, marks in marks_data.items():
+                Result.objects.create(
+                    student_id=student_id,
+                    student_class_id=class_id,
+                    subject_id=subject_id,
+                    marks=marks
+                )
+            messages.success(request, "Result info added successfully!")
+            return redirect('add_result')
         except Exception as e:
             messages.error(request, f'Something went wrong: {str(e)}')
-        return redirect('add_student')
+        return redirect('add_result')
     return render(request, 'add_result.html', locals())
 
+@login_required
 def manage_students(request):
     students = Student.objects.all()
     
     return render(request,'manage_students.html', locals())
+
+from django.http import JsonResponse
+
+@login_required
+def get_students_subjects(request):
+    class_id = request.GET.get('class_id')
+
+    if class_id:
+        students = list(
+            Student.objects.filter(student_class_id=class_id)
+            .values('id', 'name', 'roll_number')
+        )
+
+        subject_combination = SubjectCombination.objects.filter(
+            student_class_id=class_id, status=1
+        ).select_related('subject')
+
+        subjects = [
+            {'id': sc.subject.id, 'name': sc.subject.subject_name} 
+            for sc in subject_combination
+        ]
+
+        return JsonResponse({'students': students, 'subjects': subjects})
+
+    return JsonResponse({'students': [], 'subjects': []})
+
+@login_required
+def manage_result(request):
+    results = Result.objects.select_related('student', 'student_class').all()
+    students = {}
+    for res in results:
+        stu_id = res.student.id
+        if stu_id not in students:
+            students[stu_id] = {
+                'student': res.student,
+                'class': res.student_class
+            }
+    return render(request,'manage_result.html',{'results' : students.values()})
+
+@login_required
+def edit_result(request, stid):
+    student = Student.objects.get(id=stid)
+    results = Result.objects.filter(student=student)
+
+    if request.method == 'POST':
+        ids = request.POST.getlist('id[]')
+        marks = request.POST.getlist('marks[]')
+
+        for i in range(len(ids)):
+            result = Result.objects.get(id=ids[i])
+            result.marks = marks[i]
+            result.save()
+        messages.success(request, "Results updated successfully!")
+        # return redirect('edit_result', stid=student.id)
+        return redirect('manage_result')
+    return render(request,'edit_result.html',locals())
+
+from django.contrib.auth import update_session_auth_hash
+def change_password(request):
+    if request.method == 'POST':
+        current_password = request.POST.get('old_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        if not request.user.check_password(current_password):
+            messages.error(request, "Current password is incorrect.")
+            return redirect('change_password')
+
+        if new_password != confirm_password:
+            messages.error(request, "New passwords do not match.")
+            return redirect('change_password')
+
+        request.user.set_password(new_password)
+        request.user.save()
+        update_session_auth_hash(request, request.user)  # Important to keep the user logged in
+        messages.success(request, "Password changed successfully!")
+        return redirect('admin_dashboard')
+
+
+    return render(request, 'change_password.html')
+
+
+def search_result(request):
+    classes = Studentclass.objects.all()
+    return render(request, 'search_result.html', locals())
+
+def check_result(request):
+    if request.method == 'POST' :
+        rollid = request.POST['rollid']
+        class_id = request.POST['class']
+
+        try:
+            student = Student.objects.get(roll_number=rollid, student_class_id=class_id)
+            results = Result.objects.filter(student=student).select_related('subject')
+
+            total_marks = sum([r.marks for r in results])
+            subject_count = results.count()
+            max_total = subject_count * 100  # Assuming each subject is out of 100
+            percentage = (total_marks / max_total) * 100 if max_total > 0 else 0
+            percentage = round(percentage, 2)
+            return render(request, 'result_page.html', locals())
+        except Exception as e:
+            messages.error(request, "No result found. Please check your Roll Number and Class.")
+            return redirect('search_result')
+    
+   

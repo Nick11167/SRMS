@@ -40,4 +40,11 @@ urlpatterns = [
     path('add_notice/',add_notice, name='add_notice'),
     path('manage_notice/',manage_notice, name='manage_notice'),
     path('add_result/',add_result, name='add_result'),
+    path('get_students_subjects/',get_students_subjects, name='get_students_subjects'),
+    path('manage_result/',manage_result, name='manage_result'),
+    path('edit_result/<int:stid>/',edit_result, name='edit_result'),
+    path('change_password/',change_password, name='change_password'),
+    path('search_result/',search_result, name='search_result'),
+    path('check_result/',check_result, name='check_result'),
+    path('notice_detail/<int:notice_id>/',notice_detail, name='notice_detail')
 ]

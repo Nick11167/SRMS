@@ -4,7 +4,7 @@
 {% block content %}
 
 <div class="container">
-    <h2 class="mb-4"><i class="fas fa-plus"></i>Declare Result</h2>
+    <h2 class="mb-4"><i class="fas fa-plus"></i> Declare Result</h2>
 
     {% if messages %}
         {% for m in messages %}
@@ -19,14 +19,24 @@
      
             
         <div class="mb-3">
-            <label for="student_id" class="form-label">Select Class</label>
+            <label for="class_id" class="form-label">Select Class</label>
+            <select class="form-select" id="class_id" name="classid" required>
+                <option value="">--Select Class--</option>
+                {% for i in classes %}
+                <option value="{{ i.id }}">{{ i.yearStream }} {{ i.streamName }}  {{ i.section }}</option>
+                {% endfor %}    
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="student_id" class="form-label">Select Student</label>
             <select class="form-select" id="student_id" name="studentid" required>
-                <option value="">--Select Student--</option>
+                <option value="">--Select Student--</option>    
             </select>
         </div>
 
         <div id="subject_fields">
-
+           
         </div>
         
         <button type="submit" class="btn btn-success">
@@ -35,14 +45,37 @@
     </form>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js">{
-    document.getElementById('class_id').addEventListener('Change', function(){
+<script>
+    document.getElementById('class_id').addEventListener('change', function(){
         const classId = this.value;
 
 
         if(!classId) return;
 
-        fetch(`/get_students_subjects/?class_id=${classId}/`)
+        fetch(`/get_students_subjects/?class_id=${classId}`)
+        .then(response => response.json())
+        .then(data =>{
+            const studentSelect = document.getElementById('student_id');
+            studentSelect.innerHTML = '<option value="">--Select Student--</option>';
+            data.students.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.id;
+                option.text = `${student.name} (Roll No : ${student.roll_number})`;
+                studentSelect.appendChild(option);
+            });
+
+            const subjectFieldsDiv = document.getElementById('subject_fields');
+            subjectFieldsDiv.innerHTML = '<h5 class="mt-5">Subjects and Marks</h5>';
+            data.subjects.forEach(subject => {
+                const div = document.createElement('div');
+                div.className = 'mb-3';
+                div.innerHTML = `<label class="form-label">${subject.name}</label>
+                <input type="number" name="marks_${subject.id}" class="form-control" required>`;
+
+                subjectFieldsDiv.appendChild(div);
+            });   
+        })
+
     })
 </script>
 

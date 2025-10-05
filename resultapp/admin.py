@@ -6,4 +6,5 @@ admin.site.register(Subject)
 admin.site.register(Student)
 admin.site.register(SubjectCombination)
 admin.site.register(Result)
+admin.site.register(Notice)
 

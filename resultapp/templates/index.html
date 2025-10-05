@@ -14,8 +14,9 @@
     <div class="border p-3 rounded bg-light">
       <marquee direction="up" scrollamount="3" onmouseover="this.stop()" onmouseout="this.start()">
         <ul class="list-unstyled">
-          <li class="mb-2"><a href="" target="_blank"><i class="fas fa-angle-right text-primary"></i>Notice1</a></li>
-          <li class="mb-4"><a href="notice2.html" target="_blank"><i class="fas fa-angle-right text-primary"></i>Notice2</a></li>
+          {% for notice in notices %}
+          <li class="mb-2"><a href="{% url 'notice_detail' notice.id %}" target="_blank"><i class="fas fa-angle-right text-primary"></i>{{notice.title}}</a></li>
+          {% endfor %}
         </ul>
       </marquee>
     </div>
