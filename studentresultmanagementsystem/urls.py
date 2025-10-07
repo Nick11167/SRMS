@@ -23,6 +23,7 @@ from resultapp import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',index, name='home'),
+    path('admin_register/', admin_register, name='admin_register'),
     path('admin_login/',admin_login, name='admin_login'),
     path('admin_dashboard/',admin_dashboard, name='admin_dashboard'),
     path('create_class/',create_class, name='create_class'),
@@ -46,5 +47,5 @@ urlpatterns = [
     path('change_password/',change_password, name='change_password'),
     path('search_result/',search_result, name='search_result'),
     path('check_result/',check_result, name='check_result'),
-    path('notice_detail/<int:notice_id>/',notice_detail, name='notice_detail')
+    path('notice_detail/<int:notice_id>/',notice_detail, name='notice_detail'),
 ]

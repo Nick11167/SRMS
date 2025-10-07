@@ -3,6 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .models import *
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+
 
 
 def index(request):
@@ -15,20 +17,52 @@ def notice_detail(request, notice_id):
 
 # @login_required
 def admin_login(request):
-    if request.user.is_authenticated:
-        return redirect('admin_dashboard')
-    error = None
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request,username=username,password=password)
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(username=username, password=password)
 
-        if user is not None and user.is_superuser:
+        if user is not None and user.is_staff:
             login(request, user)
             return redirect('admin_dashboard')
         else:
-            error = "Invalid credentials or not authorized."
-    return render(request, 'admin_login.html',locals())
+            return render(request, "admin_login.html", {"error": "Invalid credentials or not authorized."})
+    return render(request, "admin_login.html")
+
+
+from django.contrib.auth.models import User
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
+from django.contrib import messages
+
+def admin_register(request):
+    if request.method == "POST":
+        username = request.POST.get('username').strip()
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+
+        # check if username already exists
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "This username already exists. Please try another one.")
+            return redirect('admin_register')
+
+        # check if passwords match
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return redirect('admin_register')
+
+        # create user and mark as admin
+        user = User.objects.create_user(username=username, password=password)
+        user.is_staff = True
+        user.save()
+
+        # auto-login newly registered user
+        login(request, user)
+        messages.success(request, "Registration successful! You are now logged in.")
+        return redirect('admin_dashboard')  # change this to your admin home page
+
+    return render(request, "admin_register.html")
+
 
 @login_required
 def admin_dashboard(request):
